@@ -207,7 +207,7 @@ print("Begin tests for Module-03 Assessment...")
 print('*' * 79)
 print("Testing number of VPCs and to make sure the one just created is tagged: " + tag + "...")
 
-if len(responseVPC['Vpcs']) == correctNumberOfVpcs and responseVPC['Vpcs'][1]['Tags'][0]['Value'] == tag:
+if len(responseVPC['Vpcs']) == correctNumberOfVpcs and any(tag in [t['Value'] for t in vpc.get('Tags', [])] for vpc in responseVPC['Vpcs']):
   print("Well done! You have the correct number of VPCs: " + str(correctNumberOfVpcs) + "...")
   print("And your new VPC was tagged: " +  tag + "...")
   grandtotal += 1
