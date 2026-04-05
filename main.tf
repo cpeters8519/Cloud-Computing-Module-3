@@ -119,52 +119,6 @@ resource "aws_main_route_table_association" "a" {
   route_table_id = aws_route_table.example.id
 }
 
-# IAM instance policy
-resource "aws_iam_instance_profile" "coursera_profile" {
-  name = "coursera_instance_profile"
-  role = aws_iam_role.role.name
-}
-
-# Creating the policy (rules) for what the role can do
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-# Creating the role
-resource "aws_iam_role" "role" {
-  name               = "project_role"
-  path               = "/"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-}
-
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy
-resource "aws_iam_role_policy" "s3_fullaccess_policy" {
-  name = "s3_fullaccess_policy"
-  role = aws_iam_role.role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "s3:*",
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      },
-    ]
-  })
-}
-
 # creating a private IPv4 subnet per AZ
 resource "aws_subnet" "private" {
   depends_on              = [aws_vpc.project]
@@ -202,10 +156,6 @@ resource "aws_launch_template" "lt" {
   instance_type                        = var.instance-type
   key_name                             = var.key-name
   vpc_security_group_ids               = [aws_security_group.allow_http.id]
-
-  iam_instance_profile {
-    name = aws_iam_instance_profile.coursera_profile.name
-  }
 
   tag_specifications {
     resource_type = "instance"
